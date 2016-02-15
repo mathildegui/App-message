@@ -1,4 +1,4 @@
-package com.mathilde.appmessage;
+package com.mathilde.appmessage.fragment;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -6,12 +6,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mathilde.appmessage.R;
+
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainFragment extends Fragment {
 
-    public MainActivityFragment() {
+    public static MainFragment newInstance() {
+        return new MainFragment();
+    }
+
+    public MainFragment() {
+
     }
 
     @Override
