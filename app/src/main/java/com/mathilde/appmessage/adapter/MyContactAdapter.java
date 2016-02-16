@@ -37,10 +37,10 @@ public class MyContactAdapter extends RecyclerView.Adapter<MyContactAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mTextViewName.setText(mContactsList.get(position).name);
-        holder.mTextViewNumber.setText(mContactsList.get(position).number);
-        if(mContactsList.get(position).picture != null) {
-            holder.mImageViewPhoto.setImageBitmap(mContactsList.get(position).picture);
+        holder.mTextViewName.setText(mContactsList.get(position).getName());
+        holder.mTextViewNumber.setText(mContactsList.get(position).getNumber());
+        if(mContactsList.get(position).getPicture() != null) {
+            holder.mImageViewPhoto.setImageBitmap(mContactsList.get(position).getPicture());
         } else {
             holder.mImageViewPhoto.setImageResource(R.drawable.default_user);
         }

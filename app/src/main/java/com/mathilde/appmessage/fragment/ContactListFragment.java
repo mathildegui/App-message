@@ -13,6 +13,7 @@ import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +21,10 @@ import android.widget.ProgressBar;
 
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.adapter.MyContactAdapter;
+import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.utils.QueryContact;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -63,6 +66,13 @@ public class ContactListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_contact, container, false);
 
+
+
+        String query = "SELECT * FROM Message";
+        List<Message> list  = SQLite.select().from(Message.class).queryList();
+        for(Message m : list) {
+            Log.d("Mon message ", m.toString());
+        }
 
         init(view);
         new GetContactsAsync().execute();
