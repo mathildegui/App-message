@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -24,6 +25,7 @@ import com.mathilde.appmessage.adapter.MyContactAdapter;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.utils.QueryContact;
+import com.mathilde.appmessage.utils.RecyclerItemClickListener;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import java.io.InputStream;
@@ -112,6 +114,13 @@ public class ContactListFragment extends Fragment {
 
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                Log.d("ICI", "j'ai clique " + position);
+                Log.d("ICI", "j'ai clique sur " + ((MyContactAdapter)mRecyclerView.getAdapter()).getItem(position).toString());
+            }
+        }));
         mRecyclerView.setLayoutManager(mLayoutManager);
     }
 

@@ -1,7 +1,6 @@
 package com.mathilde.appmessage.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,17 +43,14 @@ public class MyContactAdapter extends RecyclerView.Adapter<MyContactAdapter.View
         } else {
             holder.mImageViewPhoto.setImageResource(R.drawable.default_user);
         }
-
     }
-
-
 
     @Override
     public int getItemCount() {
         return mContactsList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView mTextViewName;
         public TextView mTextViewNumber;
         public ImageView mImageViewPhoto;
@@ -64,22 +60,6 @@ public class MyContactAdapter extends RecyclerView.Adapter<MyContactAdapter.View
             mTextViewName   = (TextView)v.findViewById(R.id.name);
             mTextViewNumber = (TextView)v.findViewById(R.id.number);
             mImageViewPhoto = (ImageView)v.findViewById(R.id.photo);
-
-            mTextViewName.setOnClickListener(this);
-            mTextViewNumber.setOnClickListener(this);
-            mImageViewPhoto.setOnClickListener(this);
-        }
-
-
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()){
-                case R.id.name:
-                case R.id.photo:
-                case R.id.number:
-                    Log.d("CLICK", "click");
-                    break;
-            }
         }
     }
 
