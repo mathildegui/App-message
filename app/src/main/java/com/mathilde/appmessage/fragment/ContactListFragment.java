@@ -15,18 +15,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.adapter.MyContactAdapter;
-import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.utils.QueryContact;
 import com.mathilde.appmessage.utils.RecyclerItemClickListener;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -39,9 +36,11 @@ public class ContactListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private OnListFragmentInteractionListener mListener;
 
-    private static final String SELECTION    = ContactsContract.Contacts.HAS_PHONE_NUMBER + " = '1'";
-    private static final String SORT_ORDER   = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC";
-    private static final String[] PROJECTION = new String[] {
+    private static final int LIMIT                = 20;
+    private static final String SELECTION         = ContactsContract.Contacts.HAS_PHONE_NUMBER + " = '1'";
+    private static final String SORT_ORDER_FIRST  = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC LIMIT " + LIMIT;
+    private static final String SORT_ORDER_OFFSET = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC LIMIT -1 OFFSET " + LIMIT;
+    private static final String[] PROJECTION      = new String[] {
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.DISPLAY_NAME
     };
@@ -68,17 +67,13 @@ public class ContactListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_contact, container, false);
 
-
-
-        String query = "SELECT * FROM Message";
+        /*
         List<Message> list  = SQLite.select().from(Message.class).queryList();
         for(Message m : list) {
             Log.d("Mon message ", m.toString());
-        }
-
+        }*/
         init(view);
-        new GetContactsAsync().execute();
-
+        getContacts(SORT_ORDER_FIRST, true);
         return view;
     }
 
@@ -87,7 +82,7 @@ public class ContactListFragment extends Fragment {
 
         @Override
         protected List<User> doInBackground(Void... params) {
-            return getContacts();
+            return getContacts(SORT_ORDER_OFFSET, false);
         }
 
         @Override
@@ -105,9 +100,9 @@ public class ContactListFragment extends Fragment {
     private void init(View v) {
         Context context = v.getContext();
 
-        mList           = new ArrayList<>();
-        mProgressBar    = (ProgressBar)v.findViewById(R.id.progress_bar);
-        mRecyclerView   = (RecyclerView)v.findViewById(R.id.recycler_view);
+        mList         = new ArrayList<>();
+        mProgressBar  = (ProgressBar)v.findViewById(R.id.progress_bar);
+        mRecyclerView = (RecyclerView)v.findViewById(R.id.recycler_view);
 
         RecyclerView.Adapter mAdapter             = new MyContactAdapter(mList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
@@ -117,6 +112,7 @@ public class ContactListFragment extends Fragment {
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
+                MessageFragment.newInstance(((MyContactAdapter) mRecyclerView.getAdapter()).getItem(position));
                 Log.d("ICI", "j'ai clique " + position);
                 Log.d("ICI", "j'ai clique sur " + ((MyContactAdapter)mRecyclerView.getAdapter()).getItem(position).toString());
             }
@@ -124,8 +120,8 @@ public class ContactListFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
     }
 
-    private List<User> getContacts() {
-        Cursor cursorContact = QueryContact.getInstance(getActivity()).getContacts(PROJECTION, SELECTION, null, SORT_ORDER);
+    private List<User> getContacts(String args, boolean isFirst) {
+        Cursor cursorContact = QueryContact.getInstance(getActivity()).getContacts(PROJECTION, SELECTION, null, args);
         if(cursorContact != null) {
             while (cursorContact.moveToNext()) {
                 String contactId   = cursorContact.getString(cursorContact.getColumnIndex(ContactsContract.Contacts._ID));
@@ -150,6 +146,9 @@ public class ContactListFragment extends Fragment {
                 }
             }
             cursorContact.close();
+        }
+        if(isFirst) {
+            new GetContactsAsync().execute();
         }
         return mList;
     }

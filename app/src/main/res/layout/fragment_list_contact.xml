@@ -18,12 +18,12 @@
         app:layoutManager="LinearLayoutManager"
         tools:context="com.mathilde.appmessage.fragment.ContactListFragment"
         tools:listitem="@layout/fragment_list_contact"
-        android:visibility="gone" />
+         />
 
     <ProgressBar
-
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 </RelativeLayout>
