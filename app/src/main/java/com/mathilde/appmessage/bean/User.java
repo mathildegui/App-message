@@ -8,6 +8,7 @@ import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.ModelContainer;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
 /**
@@ -22,26 +23,31 @@ public class User extends BaseModel implements Parcelable {
     @PrimaryKey(autoincrement = true)
     long id;
     @Column
+    long contactId;
+    @Column
     String name;
     @Column
     String number;
     Bitmap picture;
 
     public User() {
+
     }
 
-    public User(String name, String number, Bitmap picture) {
-        this.id      = ++increment;
-        this.name    = name;
-        this.number  = number;
-        this.picture = picture;
+    public User(long contactId, String name, String number, Bitmap picture) {
+        this.id        = ++increment;
+        this.name      = name;
+        this.number    = number;
+        this.picture   = picture;
+        this.contactId = contactId;
     }
 
     protected User(Parcel in) {
-        id      = in.readLong();
-        name    = in.readString();
-        number  = in.readString();
-        picture = in.readParcelable(Bitmap.class.getClassLoader());
+        id        = in.readLong();
+        contactId = in.readLong();
+        name      = in.readString();
+        number    = in.readString();
+        picture   = in.readParcelable(Bitmap.class.getClassLoader());
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -64,6 +70,7 @@ public class User extends BaseModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
+        dest.writeLong(contactId);
         dest.writeString(name);
         dest.writeString(number);
         dest.writeValue(picture);
@@ -85,6 +92,10 @@ public class User extends BaseModel implements Parcelable {
         return picture;
     }
 
+    public long getContactId() {
+        return contactId;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -93,5 +104,9 @@ public class User extends BaseModel implements Parcelable {
                 ", number='" + number + '\'' +
                 ", picture=" + picture +
                 '}';
+    }
+
+    public static User getUserByContactId(long id) {
+        return SQLite.select().from(User.class).where(User_Table.contactId.eq(id)).querySingle();
     }
 }

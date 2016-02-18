@@ -15,11 +15,11 @@ import java.util.List;
 /**
  * @author mathilde on 09/02/16.
  */
-public class MyContactAdapter extends RecyclerView.Adapter<MyContactAdapter.ViewHolder>{
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
 
     private List<User> mContactsList;
 
-    public MyContactAdapter (List<User> contacts) {
+    public ContactAdapter(List<User> contacts) {
         mContactsList = contacts;
     }
 

@@ -40,5 +40,4 @@ public class QueryContact {
                                @Nullable String sortOrder) {
         return cr.query(ContactsContract.Contacts.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
     }
-
 }

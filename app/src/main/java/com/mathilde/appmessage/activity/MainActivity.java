@@ -1,18 +1,22 @@
 package com.mathilde.appmessage.activity;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.mathilde.appmessage.R;
+import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.fragment.ContactListFragment;
 import com.mathilde.appmessage.fragment.MainFragment;
+import com.mathilde.appmessage.fragment.MessageFragment;
 
 public class MainActivity extends AppCompatActivity implements
         ContactListFragment.OnListFragmentInteractionListener {
@@ -31,6 +35,14 @@ public class MainActivity extends AppCompatActivity implements
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, MainFragment.newInstance()).commit();
         }
+        /*final AccountManager manager = AccountManager.get(this);
+        final Account[] accounts = manager.getAccountsByType("com.google");
+        final int size = accounts.length;
+        String[] names = new String[size];
+        for (int i = 0; i < size; i++) {
+            names[i] = accounts[i].name;
+            Log.d("NAME", names[i]);
+        }*/
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -57,12 +69,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -71,7 +78,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onListFragmentInteraction() {
+    public void onListFragmentInteraction(User user) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
+        transaction.replace(R.id.fragment_container, MessageFragment.newInstance(user));
+        transaction.addToBackStack(null);
+
+        transaction.commit();
     }
 }

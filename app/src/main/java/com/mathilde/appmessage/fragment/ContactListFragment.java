@@ -17,10 +17,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.mathilde.appmessage.R;
-import com.mathilde.appmessage.adapter.MyContactAdapter;
+import com.mathilde.appmessage.adapter.ContactAdapter;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.utils.QueryContact;
 import com.mathilde.appmessage.utils.RecyclerItemClickListener;
@@ -32,7 +31,6 @@ import java.util.List;
 public class ContactListFragment extends Fragment {
 
     private List<User> mList;
-    private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private OnListFragmentInteractionListener mListener;
 
@@ -90,21 +88,18 @@ public class ContactListFragment extends Fragment {
             super.onPostExecute(users);
             mList = users;
 
-            mProgressBar.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
-
             mRecyclerView.getAdapter().notifyDataSetChanged();
         }
     }
 
     private void init(View v) {
+        getActivity().findViewById(R.id.fab).setVisibility(View.GONE);
         Context context = v.getContext();
 
         mList         = new ArrayList<>();
-        mProgressBar  = (ProgressBar)v.findViewById(R.id.progress_bar);
         mRecyclerView = (RecyclerView)v.findViewById(R.id.recycler_view);
 
-        RecyclerView.Adapter mAdapter             = new MyContactAdapter(mList);
+        RecyclerView.Adapter mAdapter             = new ContactAdapter(mList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
 
         mRecyclerView.setAdapter(mAdapter);
@@ -112,9 +107,10 @@ public class ContactListFragment extends Fragment {
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                MessageFragment.newInstance(((MyContactAdapter) mRecyclerView.getAdapter()).getItem(position));
+                mListener.onListFragmentInteraction(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position));
+                ((ContactAdapter)mRecyclerView.getAdapter()).getItem(position).save();
                 Log.d("ICI", "j'ai clique " + position);
-                Log.d("ICI", "j'ai clique sur " + ((MyContactAdapter)mRecyclerView.getAdapter()).getItem(position).toString());
+                Log.d("ICI", "j'ai clique sur " + ((ContactAdapter)mRecyclerView.getAdapter()).getItem(position).toString());
             }
         }));
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -124,11 +120,11 @@ public class ContactListFragment extends Fragment {
         Cursor cursorContact = QueryContact.getInstance(getActivity()).getContacts(PROJECTION, SELECTION, null, args);
         if(cursorContact != null) {
             while (cursorContact.moveToNext()) {
-                String contactId   = cursorContact.getString(cursorContact.getColumnIndex(ContactsContract.Contacts._ID));
+                long contactId   = cursorContact.getLong(cursorContact.getColumnIndex(ContactsContract.Contacts._ID));
                 String contactName = cursorContact.getString(cursorContact.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
                 //  Get all phone numbers.
-                Cursor cursorPhones = QueryContact.getInstance(getActivity()).getPhones(contactId);
+                Cursor cursorPhones = QueryContact.getInstance(getActivity()).getPhones(String.valueOf(contactId));
 
                 String number = null;
                 if (cursorPhones != null) {
@@ -138,10 +134,11 @@ public class ContactListFragment extends Fragment {
                         if(type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) {
                             if (index != -1) {
                                 number = cursorPhones.getString(index);
+                                mList.add(new User(contactId, contactName, number, loadContactPhoto(getActivity().getContentResolver(), String.valueOf(contactId))));
                             }
                         }
                     }
-                    mList.add(new User(contactName, number, loadContactPhoto(getActivity().getContentResolver(), contactId)));
+                    Log.d("THE ID ___", contactId + "");
                     cursorPhones.close();
                 }
             }
@@ -182,6 +179,6 @@ public class ContactListFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction();
+        void onListFragmentInteraction(User user);
     }
 }
