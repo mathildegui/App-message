@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -34,6 +36,10 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        /**
+         * FIXME :: CLEAN THIS SHIT
+         */
 
         List<Message> list  = SQLite.select().from(Message.class).groupBy(Message_Table.sender_id).queryList();
         List<String> ls = new ArrayList<>();
