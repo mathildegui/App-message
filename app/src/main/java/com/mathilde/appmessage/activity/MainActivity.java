@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
 
-                //mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_open_search));
+                mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_search_white, null));
 
                 isSearchOpened = false;
             } else {
@@ -108,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements
 
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
+
+                mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_close_white, null));
 
                 isSearchOpened = true;
             }
