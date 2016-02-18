@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,18 +28,12 @@ import com.mathilde.appmessage.fragment.MessageFragment;
 public class MainActivity extends AppCompatActivity implements
         ContactListFragment.OnListFragmentInteractionListener {
 
-    private String mSearchString;
-    private ActionBar mActionBar;
-    private MenuItem mSearchAction;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mActionBar = getSupportActionBar();
 
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState != null) {
@@ -55,6 +51,23 @@ public class MainActivity extends AppCompatActivity implements
             Log.d("NAME", names[i]);
         }*/
 
+        /*mSearchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });*/
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    private EditText mSearchEditText;
+    /*private EditText mSearchEditText;
     private boolean isSearchOpened = false;
 
     private void handleSearchBar() {
@@ -139,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     public void onListFragmentInteraction(User user) {

@@ -50,6 +50,23 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         return mContactsList.size();
     }
 
+    public User removeItem(int position) {
+        final User user = mContactsList.remove(position);
+        notifyItemRemoved(position);
+        return user;
+    }
+
+    public void addItem(int position, User user) {
+        mContactsList.add(position, user);
+        notifyItemInserted(position);
+    }
+
+    public void moveItem(int from, int to) {
+        final User u = mContactsList.get(from);
+        mContactsList.add(to, u);
+        notifyItemMoved(from, to);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView mTextViewName;
         public TextView mTextViewNumber;

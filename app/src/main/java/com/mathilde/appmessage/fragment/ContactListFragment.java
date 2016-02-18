@@ -11,10 +11,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -28,11 +34,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactListFragment extends Fragment {
+public class ContactListFragment extends Fragment implements SearchView.OnQueryTextListener{
 
     private List<User> mList;
     private RecyclerView mRecyclerView;
     private OnListFragmentInteractionListener mListener;
+
+    private String mSearchString;
+    private ActionBar mActionBar;
+    private MenuItem mSearchAction;
 
     private static final int LIMIT                = 20;
     private static final String SELECTION         = ContactsContract.Contacts.HAS_PHONE_NUMBER + " = '1'";
@@ -65,6 +75,8 @@ public class ContactListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_contact, container, false);
 
+        //mActionBar = getActivity().getActionBar();
+
         /*
         List<Message> list  = SQLite.select().from(Message.class).queryList();
         for(Message m : list) {
@@ -73,6 +85,25 @@ public class ContactListFragment extends Fragment {
         init(view);
         getContacts(SORT_ORDER_FIRST, true);
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_search, menu);
+
+        final MenuItem item = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(this);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
     }
 
     private class GetContactsAsync extends AsyncTask<Void, Void, List<User>> {
