@@ -67,6 +67,24 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         notifyItemMoved(from, to);
     }
 
+    public void animateTo(List<User> list) {
+        applyAndAnimateRemovals(list);
+        applyAndAnimateAdditions(list);
+        applyAndAnimateMovedItems(list);
+    }
+
+    private void applyAndAnimateRemovals(List<User> newList) {
+
+    }
+
+    private void applyAndAnimateAdditions(List<User> newList) {
+
+    }
+
+    private void applyAndAnimateMovedItems(List<User> newList) {
+
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView mTextViewName;
         public TextView mTextViewNumber;
