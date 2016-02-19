@@ -74,15 +74,31 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     private void applyAndAnimateRemovals(List<User> newList) {
-
+        for (int i = mContactsList.size() - 1; i >= 0; i--) {
+            final User model = mContactsList.get(i);
+            if (!newList.contains(model)) {
+                removeItem(i);
+            }
+        }
     }
 
     private void applyAndAnimateAdditions(List<User> newList) {
-
+        for (int i = 0, count = newList.size(); i < count; i++) {
+            final User model = newList.get(i);
+            if (!mContactsList.contains(model)) {
+                addItem(i, model);
+            }
+        }
     }
 
     private void applyAndAnimateMovedItems(List<User> newList) {
-
+        for (int toPosition = newList.size() - 1; toPosition >= 0; toPosition--) {
+            final User model = newList.get(toPosition);
+            final int fromPosition = mContactsList.indexOf(model);
+            if (fromPosition >= 0 && fromPosition != toPosition) {
+                moveItem(fromPosition, toPosition);
+            }
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

@@ -101,9 +101,25 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
         return false;
     }
 
+    private List<User> filter(List<User> users, String query) {
+        query = query.toLowerCase();
+
+        final List<User> userList = new ArrayList<>();
+        for (User model : users) {
+            final String text = model.getName().toLowerCase();
+            if (text.contains(query)) {
+                userList.add(model);
+            }
+        }
+        return userList;
+    }
+
     @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
+    public boolean onQueryTextChange(String query) {
+        final List<User> filteredModelList = filter(mList, query);
+        mAdapter.animateTo(filteredModelList);
+        mRecyclerView.scrollToPosition(0);
+        return true;
     }
 
     private class GetContactsAsync extends AsyncTask<Void, Void, List<User>> {
@@ -122,7 +138,7 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
             mRecyclerView.getAdapter().notifyDataSetChanged();
         }
     }
-
+    ContactAdapter mAdapter;
     private void init(View v) {
         getActivity().findViewById(R.id.fab).setVisibility(View.GONE);
         Context context = v.getContext();
@@ -130,7 +146,7 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
         mList         = new ArrayList<>();
         mRecyclerView = (RecyclerView)v.findViewById(R.id.recycler_view);
 
-        RecyclerView.Adapter mAdapter             = new ContactAdapter(mList);
+        mAdapter             = new ContactAdapter(mList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
 
         mRecyclerView.setAdapter(mAdapter);
