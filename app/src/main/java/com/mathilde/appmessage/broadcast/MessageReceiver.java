@@ -23,6 +23,7 @@ import com.mathilde.appmessage.utils.Numbers;
 import com.mathilde.appmessage.utils.QueryContact;
 
 import java.io.InputStream;
+import java.util.Date;
 
 public class MessageReceiver extends BroadcastReceiver {
     final SmsManager sms = SmsManager.getDefault();
@@ -46,7 +47,7 @@ public class MessageReceiver extends BroadcastReceiver {
                         //Object pdus[] = (Object[]) b.get("pdus");
                         currentMessage = SmsMessage.createFromPdu((byte[]) objs[i]);
                     }
-                    String message     = currentMessage.getDisplayMessageBody();
+                    String message = currentMessage.getDisplayMessageBody();
                     String phoneNumber = currentMessage.getDisplayOriginatingAddress();
 
 
@@ -56,8 +57,8 @@ public class MessageReceiver extends BroadcastReceiver {
                             ContactsContract.Contacts.DISPLAY_NAME}, null, null, null);
                     long contactId = -1;
                     String contactName = null;
-                    if(c != null) {
-                        if(c.moveToFirst()) {
+                    if (c != null) {
+                        if (c.moveToFirst()) {
                             contactId = c.getLong(c.getColumnIndex(ContactsContract.PhoneLookup._ID));
                             contactName = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
                         }
@@ -67,13 +68,13 @@ public class MessageReceiver extends BroadcastReceiver {
                     //Create the message in DB if the user exist
                     //else create the message and the user
                     User u = User.getUserByContactId(contactId);
-                    if(u == null) {
+                    if (u == null) {
                         Cursor cursorPhones = QueryContact.getInstance(context).getPhones(String.valueOf(contactId));
                         if (cursorPhones != null) {
                             while (cursorPhones.moveToNext()) {
                                 int index = cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                                int type  = cursorPhones.getInt(cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
-                                if(type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) {
+                                int type = cursorPhones.getInt(cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
+                                if (type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) {
                                     if (index != -1) {
                                         phoneNumber = cursorPhones.getString(index);
                                         u = new User(contactId, contactName, phoneNumber, loadContactPhoto(context.getContentResolver(), String.valueOf(contactId)));
@@ -85,12 +86,11 @@ public class MessageReceiver extends BroadcastReceiver {
                             cursorPhones.close();
                         }
                     }
+                    m.setDate(new Date());
                     m.setMessage(message);
                     m.setSender(u);
                     m.save();
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
-
-
                 }
             }
         } catch (Exception e) {

@@ -42,13 +42,13 @@ public class MainFragment extends Fragment {
          */
 
         List<Message> list  = SQLite.select().from(Message.class).groupBy(Message_Table.sender_id).queryList();
-        List<String> ls = new ArrayList<>();
+        /*List<String> ls = new ArrayList<>();
         for(Message m : list){
             ls.add(m.getMessage());
-        }
+        }*/
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         RecyclerView rv = (RecyclerView)v.findViewById(R.id.conversations_rv);
-        RecyclerView.Adapter a = new MessageAdapter(ls);
+        RecyclerView.Adapter a = new MessageAdapter(list);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
         rv.setAdapter(a);

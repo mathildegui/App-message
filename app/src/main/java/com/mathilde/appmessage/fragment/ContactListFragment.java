@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -27,8 +28,10 @@ import android.view.ViewGroup;
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.adapter.ContactAdapter;
 import com.mathilde.appmessage.bean.User;
+import com.mathilde.appmessage.bean.User_Table;
 import com.mathilde.appmessage.utils.QueryContact;
 import com.mathilde.appmessage.utils.RecyclerItemClickListener;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,12 +40,9 @@ import java.util.List;
 public class ContactListFragment extends Fragment implements SearchView.OnQueryTextListener{
 
     private List<User> mList;
+    private ContactAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private OnListFragmentInteractionListener mListener;
-
-    private String mSearchString;
-    private ActionBar mActionBar;
-    private MenuItem mSearchAction;
 
     private static final int LIMIT                = 20;
     private static final String SELECTION         = ContactsContract.Contacts.HAS_PHONE_NUMBER + " = '1'";
@@ -124,7 +124,6 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
 
     private class GetContactsAsync extends AsyncTask<Void, Void, List<User>> {
 
-
         @Override
         protected List<User> doInBackground(Void... params) {
             return getContacts(SORT_ORDER_OFFSET, false);
@@ -138,26 +137,33 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
             mRecyclerView.getAdapter().notifyDataSetChanged();
         }
     }
-    ContactAdapter mAdapter;
+
     private void init(View v) {
         getActivity().findViewById(R.id.fab).setVisibility(View.GONE);
         Context context = v.getContext();
 
         mList         = new ArrayList<>();
+        mAdapter      = new ContactAdapter(mList);
         mRecyclerView = (RecyclerView)v.findViewById(R.id.recycler_view);
-
-        mAdapter             = new ContactAdapter(mList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
 
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
+
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                mListener.onListFragmentInteraction(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position));
-                ((ContactAdapter)mRecyclerView.getAdapter()).getItem(position).save();
-                Log.d("ICI", "j'ai clique " + position);
-                Log.d("ICI", "j'ai clique sur " + ((ContactAdapter)mRecyclerView.getAdapter()).getItem(position).toString());
+                //Create user only if it is not already in the DB - else use the local one
+                if(SQLite.select().from(User.class).where(User_Table.contactId.eq(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position).getContactId())).querySingle() != null) {
+                    mListener.onListFragmentInteraction(SQLite.select().from(User.class).where(User_Table.contactId.eq(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position).getContactId())).querySingle());
+                } else {
+                    mListener.onListFragmentInteraction(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position));
+                }
+                try {
+                    ((ContactAdapter)mRecyclerView.getAdapter()).getItem(position).save();
+                } catch (SQLiteConstraintException e) {
+                    e.printStackTrace();
+                }
             }
         }));
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -167,13 +173,13 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
         Cursor cursorContact = QueryContact.getInstance(getActivity()).getContacts(PROJECTION, SELECTION, null, args);
         if(cursorContact != null) {
             while (cursorContact.moveToNext()) {
-                long contactId   = cursorContact.getLong(cursorContact.getColumnIndex(ContactsContract.Contacts._ID));
+                long contactId     = cursorContact.getLong(cursorContact.getColumnIndex(ContactsContract.Contacts._ID));
                 String contactName = cursorContact.getString(cursorContact.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
                 //  Get all phone numbers.
                 Cursor cursorPhones = QueryContact.getInstance(getActivity()).getPhones(String.valueOf(contactId));
 
-                String number = null;
+                String number;
                 if (cursorPhones != null) {
                     while (cursorPhones.moveToNext()) {
                         int index = cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
@@ -185,7 +191,6 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
                             }
                         }
                     }
-                    Log.d("THE ID ___", contactId + "");
                     cursorPhones.close();
                 }
             }

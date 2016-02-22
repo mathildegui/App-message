@@ -8,6 +8,7 @@ import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.ModelContainer;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.annotation.Unique;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
@@ -23,11 +24,13 @@ public class User extends BaseModel implements Parcelable {
     @PrimaryKey(autoincrement = true)
     long id;
     @Column
+    @Unique(unique = true)
     long contactId;
     @Column
     String name;
     @Column
     String number;
+    @Column(typeConverter = BitmapConverter.class)
     Bitmap picture;
 
     public User() {

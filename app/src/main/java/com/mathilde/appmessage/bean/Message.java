@@ -10,6 +10,8 @@ import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
+import java.util.Date;
+
 /**
  * @author mathilde on 16/02/16.
  */
@@ -19,6 +21,8 @@ public class Message extends BaseModel implements Parcelable {
 
     @PrimaryKey(autoincrement = true)
     long id;
+    @Column
+    Date date;
     @Column
     @ForeignKey(saveForeignKeyModel = false)
     User sender;
@@ -34,6 +38,7 @@ public class Message extends BaseModel implements Parcelable {
 
     protected Message(Parcel in) {
         id       = in.readLong();
+        date     = new Date (in.readLong());
         sender   = in.readParcelable(User.class.getClassLoader());
         receiver = in.readParcelable(User.class.getClassLoader());
         message  = in.readString();
@@ -59,6 +64,7 @@ public class Message extends BaseModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
+        dest.writeLong(date.getTime());
         dest.writeParcelable(sender, flags);
         dest.writeParcelable(receiver, flags);
         dest.writeString(message);
@@ -94,6 +100,14 @@ public class Message extends BaseModel implements Parcelable {
 
     public void setSender(User sender) {
         this.sender = sender;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Date getDate() {
+        return date;
     }
 
     @Override
