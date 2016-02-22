@@ -20,7 +20,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
 
-    List<Message> mMessageList;
+    private long oldId = -2;
+    private List<Message> mMessageList;
 
     public MessageAdapter(List<Message> messages) {
         mMessageList = messages;
@@ -37,13 +38,31 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         Message m = mMessageList.get(position);
         holder.messageTv.setText(m.getMessage());
+
         if(m.getSender() == null) {
             holder.messageTv.setBackgroundColor(Color.BLUE);
-            holder.messageUserIv.setImageResource(R.drawable.default_user);
+
+            //Because getSender == null
+            long currentId = -1;
+            if(oldId != currentId) {
+                holder.messageUserIv.setVisibility(View.VISIBLE);
+                holder.messageUserIv.setImageResource(R.drawable.default_user);
+            } else {
+                holder.messageUserIv.setVisibility(View.GONE);
+            }
+
+            oldId = -1;
         } else {
             holder.messageTv.setBackgroundColor(Color.RED);
-            holder.messageUserIv.setImageBitmap(m.getSender().getPicture());
-            if(m.getSender().getPicture() != null)Log.d("Picture", m.getSender().getPicture().toString());
+
+            if(oldId != m.getSender().getContactId()) {
+                holder.messageUserIv.setVisibility(View.VISIBLE);
+                holder.messageUserIv.setImageBitmap(m.getSender().getPicture());
+            } else {
+                holder.messageUserIv.setVisibility(View.GONE);
+            }
+
+            oldId = m.getSender().getContactId();
         }
     }
 
@@ -59,9 +78,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         public ViewHolder(View v) {
             super(v);
-            messageTv = (TextView)v.findViewById(R.id.message_tv);
+            messageTv     = (TextView)v.findViewById(R.id.message_tv);
             messageUserIv = (CircleImageView)v.findViewById(R.id.message_iv);
         }
-
     }
 }
