@@ -37,14 +37,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Message m = mMessageList.get(position);
-        //holder.messageTv.setText(m.getMessage());
 
         if(m.getSender() == null) {
             holder.messageTvR.setText(m.getMessage());
             holder.messageTv.setVisibility(View.GONE);
             holder.messageTvR.setVisibility(View.VISIBLE);
             holder.messageTvR.setBackgroundColor(Color.BLUE);
-
 
             //Because getSender == null
             long currentId = -1;
@@ -53,7 +51,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 holder.messageUserIvR.setImageResource(R.drawable.default_user);
             } else {
                 holder.messageUserIvR.setVisibility(View.GONE);
-                holder.messageTv.setPadding(0, 0, 40, 0);
             }
             holder.messageUserIv.setVisibility(View.GONE);
             oldId = -1;
@@ -63,14 +60,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.messageTv.setVisibility(View.VISIBLE);
             holder.messageTv.setBackgroundColor(Color.RED);
 
-            //holder.messageTv.setBackgroundColor(Color.RED);
-
             if(oldId != m.getSender().getContactId()) {
                 holder.messageUserIv.setVisibility(View.VISIBLE);
                 holder.messageUserIv.setImageBitmap(m.getSender().getPicture());
             } else {
                 holder.messageUserIv.setVisibility(View.GONE);
-                holder.messageTv.setPadding(40,0,0,0);
             }
             holder.messageUserIvR.setVisibility(View.GONE);
             oldId = m.getSender().getContactId();
