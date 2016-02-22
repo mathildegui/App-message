@@ -22,12 +22,17 @@ import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.utils.Numbers;
 import com.mathilde.appmessage.utils.QueryContact;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.InputStream;
 import java.util.Date;
 
 public class MessageReceiver extends BroadcastReceiver {
-    final SmsManager sms = SmsManager.getDefault();
+    //final SmsManager sms = SmsManager.getDefault();
+    private EventBus bus = EventBus.getDefault();
+
     public MessageReceiver() {
+
     }
 
     @Override
@@ -90,6 +95,7 @@ public class MessageReceiver extends BroadcastReceiver {
                     m.setMessage(message);
                     m.setSender(u);
                     m.save();
+                    bus.post(m);
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                 }
             }

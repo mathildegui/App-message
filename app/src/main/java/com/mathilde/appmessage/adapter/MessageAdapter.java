@@ -1,16 +1,23 @@
 package com.mathilde.appmessage.adapter;
 
+import android.app.ActionBar;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.bean.Message;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -20,7 +27,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
 
-    private long oldId = -2;
+    //private long oldId = -2;
     private List<Message> mMessageList;
 
     public MessageAdapter(List<Message> messages) {
@@ -29,45 +36,56 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
+        View v = LayoutInflater
+                .from(parent.getContext())
                 .inflate(R.layout.fragment_item_list_message, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Message m = mMessageList.get(position);
+        final Message m = mMessageList.get(position);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)holder.messageTv.getLayoutParams();
 
-        if(m.getSender() == null) {
-            holder.messageTvR.setText(m.getMessage());
-            holder.messageTv.setVisibility(View.GONE);
-            holder.messageTvR.setVisibility(View.VISIBLE);
-            holder.messageTvR.setBackgroundColor(Color.BLUE);
+        if (m.getSender() == null) {
+            holder.messageTv.setText(m.getMessage());
+            holder.messageTv.setVisibility(View.VISIBLE);
+            holder.messageTv.setBackgroundColor(Color.BLUE);
+            lp.gravity = Gravity.RIGHT;
 
             //Because getSender == null
-            long currentId = -1;
-            if(oldId != currentId) {
-                holder.messageUserIvR.setVisibility(View.VISIBLE);
-                holder.messageUserIvR.setImageResource(R.drawable.default_user);
-            } else {
-                holder.messageUserIvR.setVisibility(View.GONE);
-            }
-            holder.messageUserIv.setVisibility(View.GONE);
-            oldId = -1;
-        } else {
-            holder.messageTv.setText(m.getMessage());
-            holder.messageTvR.setVisibility(View.GONE);
-            holder.messageTv.setVisibility(View.VISIBLE);
-            holder.messageTv.setBackgroundColor(Color.RED);
-
-            if(oldId != m.getSender().getContactId()) {
+            /*long currentId = -1;
+            if (oldId != currentId) {
                 holder.messageUserIv.setVisibility(View.VISIBLE);
-                holder.messageUserIv.setImageBitmap(m.getSender().getPicture());
+                if (m.getReceiver().getPicture() != null) {
+                    holder.messageUserIv.setImageBitmap((m.getReceiver().getPicture()));
+                } else {
+                    holder.messageUserIv.setImageResource(R.drawable.default_user);
+                }
+                Log.d("Display for me", "OLD: " + oldId + " - " + " NEW:" + currentId + " - POSITION: " + position);
             } else {
                 holder.messageUserIv.setVisibility(View.GONE);
             }
-            holder.messageUserIvR.setVisibility(View.GONE);
-            oldId = m.getSender().getContactId();
+            oldId = -1;*/
+        } else {
+            holder.messageTv.setText(m.getMessage());
+            holder.messageTv.setVisibility(View.VISIBLE);
+            holder.messageTv.setBackgroundColor(Color.RED);
+            lp.gravity = Gravity.LEFT;
+
+           /* if (oldId != m.getSender().getContactId()) {
+                holder.messageUserIv.setVisibility(View.VISIBLE);
+                if (m.getSender().getPicture() != null) {
+                    holder.messageUserIv.setImageBitmap(m.getSender().getPicture());
+                } else {
+                    holder.messageUserIv.setImageResource(R.drawable.default_user);
+                }
+                Log.d("Display for me", "OLD: " + oldId + " - " + " NEW:" + m.getSender().getContactId() + " - POSITION: " + position);
+            }
+            else {
+                holder.messageUserIv.setVisibility(View.GONE);
+            }
+            oldId = m.getSender().getContactId();*/
         }
     }
 
@@ -79,16 +97,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView messageTv;
-        public TextView messageTvR;
-        public CircleImageView messageUserIv;
-        public CircleImageView messageUserIvR;
 
         public ViewHolder(View v) {
             super(v);
-            messageTv     = (TextView)v.findViewById(R.id.message_tv);
-            messageTvR     = (TextView)v.findViewById(R.id.message_tv_r);
-            messageUserIv = (CircleImageView)v.findViewById(R.id.message_iv);
-            messageUserIvR = (CircleImageView)v.findViewById(R.id.message_iv_r);
+            messageTv = (TextView)v.findViewById(R.id.message_tv);
         }
     }
 }

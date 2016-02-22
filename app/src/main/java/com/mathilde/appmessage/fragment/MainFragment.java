@@ -41,7 +41,7 @@ public class MainFragment extends Fragment {
          * FIXME :: CLEAN THIS SHIT
          */
 
-        List<Message> list  = SQLite.select().from(Message.class).groupBy(Message_Table.sender_id).queryList();
+        List<Message> list = SQLite.select().from(Message.class).where(Message_Table.sender_id.isNotNull()).groupBy(Message_Table.sender_id).queryList();
         /*List<String> ls = new ArrayList<>();
         for(Message m : list){
             ls.add(m.getMessage());

@@ -18,6 +18,9 @@ import com.mathilde.appmessage.bean.Message_Table;
 import com.mathilde.appmessage.bean.User;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,8 +32,12 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
     public static final String RECEIVER = "receiver";
 
     private User receiver;
+    private EditText mMessageEt;
+    private RecyclerView recyclerView;
     private List<Message> mMessageList;
     private RecyclerView.Adapter mAdapter;
+
+    private EventBus bus = EventBus.getDefault();
 
     public static MessageFragment newInstance(User receiver) {
         Bundle b          = new Bundle();
@@ -56,10 +63,20 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
         getbundle();
         View view = inflater.inflate(R.layout.fragment_message, container, false);
 
+        // Register as a subscriber
+        bus.register(this);
+
         init(view);
         initList();
 
         return view;
+    }
+
+    @Subscribe
+    public void onEvent(Message message) {
+        mMessageList.add(message);
+        mAdapter.notifyItemInserted(mMessageList.size() -1);
+        recyclerView.smoothScrollToPosition(mMessageList.size() - 1);
     }
 
     private void initList() {
@@ -71,6 +88,7 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                 .queryList());
 
         mAdapter.notifyDataSetChanged();
+        recyclerView.smoothScrollToPosition(mMessageList.size() - 1);
     }
 
     private void init(View v) {
@@ -81,14 +99,14 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
         mMessageList = new ArrayList<>();
         mAdapter     = new MessageAdapter(mMessageList);
 
-        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.messages_rv);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerView = (RecyclerView) v.findViewById(R.id.messages_rv);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
 
         recyclerView.setAdapter(mAdapter);
+        recyclerView.setItemAnimator(null);
+        //recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(mLayoutManager);
     }
-
-    private EditText mMessageEt ;
 
     @Override
     public void onClick(View v) {
@@ -103,7 +121,7 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
 
                 mMessageList.add(m);
                 mMessageEt.setText("");
-                mAdapter.notifyDataSetChanged();
+                mAdapter.notifyItemInserted(mMessageList.size() -1);
 
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(receiver.getNumber(), null, message, null, null);
