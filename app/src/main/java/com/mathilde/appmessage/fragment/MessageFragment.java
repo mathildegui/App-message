@@ -139,6 +139,8 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                     m.associateConversation(conversation);
                 } else {
                     m.associateConversation(localC);
+                    localC.setLastMessage(m);
+                    localC.update();
                 }
 
                 SmsManager smsManager = SmsManager.getDefault();

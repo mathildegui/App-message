@@ -105,6 +105,8 @@ public class MessageReceiver extends BroadcastReceiver {
                         m.associateConversation(conversation);
                     } else {
                         m.associateConversation(localC);
+                        localC.setLastMessage(m);
+                        localC.update();
                     }
 
                     m.save();

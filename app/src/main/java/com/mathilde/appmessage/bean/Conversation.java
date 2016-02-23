@@ -10,6 +10,7 @@ import com.raizlabs.android.dbflow.annotation.OneToMany;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
 import com.raizlabs.android.dbflow.annotation.Unique;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import java.util.ArrayList;
@@ -30,9 +31,10 @@ public class Conversation extends BaseModel implements Parcelable {
     @Unique(unique = true)
     @ForeignKey(saveForeignKeyModel = false)
     User user;
-   /* @Column
-    @ForeignKey(saveForeignKeyModel = true)
-    ForeignKeyContainer<Message> messages;*/
+    @Column
+    @ForeignKey(saveForeignKeyModel = false)
+    Message lastMessage;
+    List<Message> messages;
 
     public Conversation() {
 
@@ -43,14 +45,14 @@ public class Conversation extends BaseModel implements Parcelable {
         this.user     = u;
         this.messages = new ArrayList<>();
         this.messages.add(m);
+        this.lastMessage = m;
     }
 
-    List<Message> messages;
-
     protected Conversation(Parcel in) {
-        id       = in.readLong();
-        user     = in.readParcelable(User.class.getClassLoader());
-        messages = in.createTypedArrayList(Message.CREATOR);
+        id          = in.readLong();
+        user        = in.readParcelable(User.class.getClassLoader());
+        lastMessage = in.readParcelable(Message.class.getClassLoader());
+        messages    = in.createTypedArrayList(Message.CREATOR);
     }
 
     public static final Creator<Conversation> CREATOR = new Creator<Conversation>() {
@@ -65,15 +67,33 @@ public class Conversation extends BaseModel implements Parcelable {
         }
     };
 
+    public Message getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(Message lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
     @OneToMany(methods = {OneToMany.Method.SAVE, OneToMany.Method.DELETE}, variableName = "messages")
-    public List<Message> getMyAnts() {
-        /*if (messages == null || messages.isEmpty()) {
+    public List<Message> getMyMessages() {
+        if (messages == null || messages.isEmpty()) {
             messages = SQLite.select()
                     .from(Message.class)
-                    .where(Message.conversationForeignKeyContainer_id.eq(id))
+                    .where(Message_Table.conversationForeignKeyContainer_id.eq(id))
                     .queryList();
-        }*/
+        }
         return messages;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Conversation{" +
+                "id=" + id +
+                ", user=" + user +
+                ", messages=" + messages +
+                '}';
     }
 
     @Override
@@ -85,15 +105,7 @@ public class Conversation extends BaseModel implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeParcelable(user, flags);
+        dest.writeParcelable(lastMessage, flags);
         dest.writeTypedList(messages);
-    }
-
-    @Override
-    public String toString() {
-        return "Conversation{" +
-                "id=" + id +
-                ", user=" + user +
-                ", messages=" + messages +
-                '}';
     }
 }

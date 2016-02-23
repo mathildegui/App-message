@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mathilde.appmessage.R;
+import com.mathilde.appmessage.adapter.ConversationAdapter;
 import com.mathilde.appmessage.adapter.MessageAdapter;
 import com.mathilde.appmessage.bean.Conversation;
 import com.mathilde.appmessage.bean.Conversation_Table;
@@ -53,10 +54,10 @@ public class MainFragment extends Fragment {
         Log.d("My list", listC.toString());
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         RecyclerView rv = (RecyclerView)v.findViewById(R.id.conversations_rv);
-        //RecyclerView.Adapter a = new MessageAdapter(list);
+        RecyclerView.Adapter a = new ConversationAdapter(listC);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
-        //rv.setAdapter(a);
+        rv.setAdapter(a);
         return v;
     }
 }
