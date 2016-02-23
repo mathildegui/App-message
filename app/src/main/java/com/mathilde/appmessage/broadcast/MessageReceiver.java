@@ -17,10 +17,13 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import com.mathilde.appmessage.bean.Conversation;
+import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.utils.Numbers;
 import com.mathilde.appmessage.utils.QueryContact;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -94,6 +97,16 @@ public class MessageReceiver extends BroadcastReceiver {
                     m.setDate(new Date());
                     m.setMessage(message);
                     m.setSender(u);
+
+                    Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(u.getContactId())).querySingle();
+                    if(localC == null) {
+                        Conversation conversation = new Conversation(u, m);
+                        conversation.save();
+                        m.associateConversation(conversation);
+                    } else {
+                        m.associateConversation(localC);
+                    }
+
                     m.save();
                     bus.post(m);
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
@@ -102,9 +115,6 @@ public class MessageReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             Log.e("SmsReceiver", "Exception smsReceiver" + e);
         }
-        // TODO: This method is called when the BroadcastReceiver is receiving
-        // an Intent broadcast.
-        //throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public Bitmap loadContactPhoto(ContentResolver cr, String id) {

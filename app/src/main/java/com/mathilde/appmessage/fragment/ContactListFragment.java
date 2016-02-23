@@ -25,6 +25,8 @@ import android.view.ViewGroup;
 
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.adapter.ContactAdapter;
+import com.mathilde.appmessage.bean.Conversation;
+import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.bean.User_Table;
 import com.mathilde.appmessage.utils.QueryContact;
@@ -73,13 +75,6 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_contact, container, false);
         setHasOptionsMenu(true);
-        //mActionBar = getActivity().getActionBar();
-
-        /*
-        List<Message> list  = SQLite.select().from(Message.class).queryList();
-        for(Message m : list) {
-            Log.d("Mon message ", m.toString());
-        }*/
         init(view);
         getContacts(SORT_ORDER_FIRST, true);
         return view;
