@@ -38,7 +38,6 @@ public class MainFragment extends Fragment {
 
     private ConversationAdapter mAdapter;
     private List<Conversation> mConversationList;
-    private EventBus bus = EventBus.getDefault();
 
     public MainFragment() {
 
@@ -49,7 +48,7 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Register as a subscriber
-        bus.register(this);
+        if(!EventBus.getDefault().isRegistered(this))EventBus.getDefault().register(this);
 
         /**
          * FIXME :: CLEAN THIS SHIT
