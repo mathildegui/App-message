@@ -16,6 +16,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -97,21 +98,21 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
     private List<User> filter(List<User> users, String query) {
         query = query.toLowerCase();
 
-        final List<User> userList = new ArrayList<>();
-        for (User model : users) {
-            final String text = model.getName().toLowerCase();
+        final List<User> filteredUserList = new ArrayList<>();
+        for (User u : users) {
+            final String text = u.getName().toLowerCase();
             if (text.contains(query)) {
-                userList.add(model);
+                filteredUserList.add(u);
             }
         }
-        return userList;
+        return filteredUserList;
     }
+
 
     @Override
     public boolean onQueryTextChange(String query) {
         final List<User> filteredModelList = filter(mList, query);
-        mAdapter.animateTo(filteredModelList);
-        mRecyclerView.scrollToPosition(0);
+        mAdapter.setFilter(filteredModelList);
         return true;
     }
 
@@ -125,41 +126,38 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
         @Override
         protected void onPostExecute(List<User> users) {
             super.onPostExecute(users);
-            mList = users;
-
-            mRecyclerView.getAdapter().notifyDataSetChanged();
+            mList.addAll(users);
+            mAdapter.notifyDataSetChanged();
         }
     }
 
     private void init(View v) {
         getActivity().findViewById(R.id.fab).setVisibility(View.GONE);
-        Context context = v.getContext();
 
         mList         = new ArrayList<>();
-        mAdapter      = new ContactAdapter(mList);
+        mAdapter      = new ContactAdapter(mList, getActivity());
         mRecyclerView = (RecyclerView)v.findViewById(R.id.recycler_view);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
 
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setHasFixedSize(true);
 
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 //Create user only if it is not already in the DB - else use the local one
-                if(SQLite.select().from(User.class).where(User_Table.contactId.eq(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position).getContactId())).querySingle() != null) {
+                if (SQLite.select().from(User.class).where(User_Table.contactId.eq(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position).getContactId())).querySingle() != null) {
                     mListener.onListFragmentInteraction(SQLite.select().from(User.class).where(User_Table.contactId.eq(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position).getContactId())).querySingle());
                 } else {
                     mListener.onListFragmentInteraction(((ContactAdapter) mRecyclerView.getAdapter()).getItem(position));
                 }
                 try {
-                    ((ContactAdapter)mRecyclerView.getAdapter()).getItem(position).save();
+                    ((ContactAdapter) mRecyclerView.getAdapter()).getItem(position).save();
                 } catch (SQLiteConstraintException e) {
                     e.printStackTrace();
                 }
             }
         }));
-        mRecyclerView.setLayoutManager(mLayoutManager);
     }
 
     private List<User> getContacts(String args, boolean isFirst) {
