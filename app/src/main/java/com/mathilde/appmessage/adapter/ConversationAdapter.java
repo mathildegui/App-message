@@ -30,10 +30,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         return new ViewHolder(v);
     }
 
+    public void updateList(List<Conversation> newList) {
+        mConversationList = newList;
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        //holder.conversationTv.setText();
-        holder.conversationTv.setText(mConversationList.get(position).getLastMessage().getMessage());
+        if(mConversationList.get(position).getLastMessage() != null) {
+            holder.conversationTv.setText(mConversationList.get(position).getLastMessage().getMessage());
+        }
     }
 
     @Override

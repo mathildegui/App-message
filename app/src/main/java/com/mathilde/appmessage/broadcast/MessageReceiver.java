@@ -97,8 +97,9 @@ public class MessageReceiver extends BroadcastReceiver {
                     m.setDate(new Date());
                     m.setMessage(message);
                     m.setSender(u);
+                    m.save();
 
-                    Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(u.getContactId())).querySingle();
+                    Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(User.getUserByContactId(u.getContactId()).getId())).querySingle();
                     if(localC == null) {
                         Conversation conversation = new Conversation(u, m);
                         conversation.save();
@@ -109,7 +110,7 @@ public class MessageReceiver extends BroadcastReceiver {
                         localC.update();
                     }
 
-                    m.save();
+
                     bus.post(m);
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                 }
@@ -118,6 +119,8 @@ public class MessageReceiver extends BroadcastReceiver {
             Log.e("SmsReceiver", "Exception smsReceiver" + e);
         }
     }
+
+
 
     public Bitmap loadContactPhoto(ContentResolver cr, String id) {
         Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.valueOf(id));

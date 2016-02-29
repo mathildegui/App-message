@@ -21,6 +21,9 @@ import com.mathilde.appmessage.bean.Message_Table;
 import com.mathilde.appmessage.bean.User;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +36,10 @@ public class MainFragment extends Fragment {
         return new MainFragment();
     }
 
+    private ConversationAdapter mAdapter;
+    private List<Conversation> mConversationList;
+    private EventBus bus = EventBus.getDefault();
+
     public MainFragment() {
 
     }
@@ -41,23 +48,33 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // Register as a subscriber
+        bus.register(this);
+
         /**
          * FIXME :: CLEAN THIS SHIT
          */
-        List<Conversation> listC = SQLite.select().from(Conversation.class).queryList();
-        //List<Message> list = SQLite.select().from(Message.class).where(Message_Table.sender_id.isNotNull()).groupBy(Message_Table.sender_id).queryList();
-        /*List<String> ls = new ArrayList<>();
-        for(Message m : list){
-            ls.add(m.getMessage());
-        }*/
+        mConversationList = SQLite.select().from(Conversation.class).queryList();
 
-        Log.d("My list", listC.toString());
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         RecyclerView rv = (RecyclerView)v.findViewById(R.id.conversations_rv);
-        RecyclerView.Adapter a = new ConversationAdapter(listC);
+        mAdapter = new ConversationAdapter(mConversationList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
-        rv.setAdapter(a);
+        rv.setAdapter(mAdapter);
         return v;
+    }
+
+    @Subscribe
+    public void onEvent(Message message) {
+        Conversation conversation = message.getConversationForeignKeyContainer().load();
+
+        if(!mConversationList.contains(conversation)) {
+            mConversationList.add(conversation);
+        } else {
+            mConversationList.set(mConversationList.indexOf(conversation), conversation);
+        }
+
+        mAdapter.notifyDataSetChanged();
     }
 }

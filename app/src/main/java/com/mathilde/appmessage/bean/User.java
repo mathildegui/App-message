@@ -37,6 +37,11 @@ public class User extends BaseModel implements Parcelable {
 
     }
 
+    public long getIdByUserId(long theid) {
+        if(theid == contactId) return id;
+        else return -1;
+    }
+
     public User(long contactId, String name, String number, Bitmap picture) {
         this.id        = ++increment;
         this.name      = name;
@@ -102,7 +107,8 @@ public class User extends BaseModel implements Parcelable {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "contactId=" + contactId +
+                ", id=" + id +
                 ", name='" + name + '\'' +
                 ", number='" + number + '\'' +
                 ", picture=" + picture +
@@ -111,5 +117,24 @@ public class User extends BaseModel implements Parcelable {
 
     public static User getUserByContactId(long id) {
         return SQLite.select().from(User.class).where(User_Table.contactId.eq(id)).querySingle();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+
+        User user = (User) o;
+
+        if (getContactId() != user.getContactId()) return false;
+        return getName().equals(user.getName());
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (getContactId() ^ (getContactId() >>> 32));
+        result = 31 * result + getName().hashCode();
+        return result;
     }
 }

@@ -47,6 +47,10 @@ public class Message extends BaseModel implements Parcelable {
 
     }
 
+    public ForeignKeyContainer<Conversation> getConversationForeignKeyContainer() {
+        return conversationForeignKeyContainer;
+    }
+
     protected Message(Parcel in) {
         id       = in.readLong();
         date     = new Date (in.readLong());

@@ -32,12 +32,24 @@ public class Conversation extends BaseModel implements Parcelable {
     @ForeignKey(saveForeignKeyModel = false)
     User user;
     @Column
-    @ForeignKey(saveForeignKeyModel = false)
+    @ForeignKey(saveForeignKeyModel = true)
     Message lastMessage;
     List<Message> messages;
 
     public Conversation() {
 
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public Conversation(User u, Message m) {
@@ -86,12 +98,12 @@ public class Conversation extends BaseModel implements Parcelable {
         return messages;
     }
 
-
     @Override
     public String toString() {
         return "Conversation{" +
                 "id=" + id +
                 ", user=" + user +
+                ", lastMessage=" + lastMessage +
                 ", messages=" + messages +
                 '}';
     }
@@ -107,5 +119,22 @@ public class Conversation extends BaseModel implements Parcelable {
         dest.writeParcelable(user, flags);
         dest.writeParcelable(lastMessage, flags);
         dest.writeTypedList(messages);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Conversation)) return false;
+
+        Conversation that = (Conversation) o;
+
+        if (getId() != that.getId()) return false;
+        return getUser().equals(that.getUser());
+
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (getId() ^ (getId() >>> 32));
     }
 }
