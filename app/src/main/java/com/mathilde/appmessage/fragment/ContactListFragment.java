@@ -178,7 +178,7 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
                         if(type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) {
                             if (index != -1) {
                                 number = cursorPhones.getString(index);
-                                mList.add(new User(contactId, contactName, number, loadContactPhoto(getActivity().getContentResolver(), String.valueOf(contactId))));
+                                if(getActivity() != null) mList.add(new User(contactId, contactName, number, loadContactPhoto(getActivity().getContentResolver(), String.valueOf(contactId))));
                             }
                         }
                     }

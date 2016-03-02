@@ -46,6 +46,8 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_main, container, false);
+        getActivity().findViewById(R.id.fab).setVisibility(View.VISIBLE);
 
         // Register as a subscriber
         if(!EventBus.getDefault().isRegistered(this))EventBus.getDefault().register(this);
@@ -55,7 +57,7 @@ public class MainFragment extends Fragment {
          */
         mConversationList = SQLite.select().from(Conversation.class).queryList();
 
-        View v = inflater.inflate(R.layout.fragment_main, container, false);
+
         RecyclerView rv = (RecyclerView)v.findViewById(R.id.conversations_rv);
         mAdapter = new ConversationAdapter(mConversationList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());

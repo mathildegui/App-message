@@ -5,12 +5,15 @@ import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.bean.Conversation;
 
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * @author mathilde on 23/02/16.
@@ -37,8 +40,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if(mConversationList.get(position).getLastMessage() != null) {
-            holder.conversationTv.setText(mConversationList.get(position).getLastMessage().getMessage());
+        Conversation c = mConversationList.get(position);
+        if(c.getLastMessage() != null) {
+
+            holder.lastMessageTv.setText(c.getLastMessage().getMessage());
+        }
+        holder.userTv.setText(c.getUser().getName());
+        if (c.getUser().getPicture() != null) {
+            holder.userIv.setImageBitmap((c.getUser().getPicture()));
+        } else {
+            holder.userIv.setImageResource(R.drawable.default_user);
         }
     }
 
@@ -49,11 +60,15 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView conversationTv;
+        TextView userTv;
+        TextView lastMessageTv;
+        CircleImageView userIv;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            conversationTv = (TextView)itemView.findViewById(R.id.conversation_tv);
+            userTv        = (TextView)itemView.findViewById(R.id.user_tv);
+            userIv        = (CircleImageView)itemView.findViewById(R.id.user_iv);
+            lastMessageTv = (TextView)itemView.findViewById(R.id.last_message_tv);
         }
     }
 }

@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -46,12 +47,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Message m = mMessageList.get(position);
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)holder.messageTv.getLayoutParams();
+        LinearLayout.LayoutParams lpIV = (LinearLayout.LayoutParams)holder.messageIv.getLayoutParams();
 
         if (m.getSender() == null) {
             holder.messageTv.setText(m.getMessage());
             holder.messageTv.setVisibility(View.VISIBLE);
             holder.messageTv.setBackgroundColor(Color.BLUE);
-            lp.gravity = Gravity.RIGHT;
+            lp.gravity   = Gravity.RIGHT;
+            lpIV.gravity = Gravity.RIGHT;
+            holder.messageIv.setImageResource(R.drawable.default_user);
 
             //Because getSender == null
             /*long currentId = -1;
@@ -71,8 +75,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.messageTv.setText(m.getMessage());
             holder.messageTv.setVisibility(View.VISIBLE);
             holder.messageTv.setBackgroundColor(Color.RED);
-            lp.gravity = Gravity.LEFT;
-
+            lp.gravity   = Gravity.LEFT;
+            lpIV.gravity = Gravity.LEFT;
+            if (m.getSender().getPicture() != null) {
+                holder.messageIv.setImageBitmap((m.getSender().getPicture()));
+            } else {
+                holder.messageIv.setImageResource(R.drawable.default_user);
+            }
+            /*if (m.getSender().getPicture() != null) {
+                holder.messageIv.setImageBitmap(m.getSender().getPicture());
+            } else {
+                holder.messageIv.setImageResource(R.drawable.default_user);
+            }*/
            /* if (oldId != m.getSender().getContactId()) {
                 holder.messageUserIv.setVisibility(View.VISIBLE);
                 if (m.getSender().getPicture() != null) {
@@ -97,10 +111,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView messageTv;
+        public CircleImageView messageIv;
 
         public ViewHolder(View v) {
             super(v);
             messageTv = (TextView)v.findViewById(R.id.message_tv);
+            messageIv = (CircleImageView)v.findViewById(R.id.message_iv);
         }
     }
 }
