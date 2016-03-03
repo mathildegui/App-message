@@ -1,6 +1,7 @@
 package com.mathilde.appmessage.adapter;
 
 import android.app.ActionBar;
+import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mathilde.appmessage.R;
@@ -28,10 +30,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
 
-    //private long oldId = -2;
+    private Context mContext;
     private List<Message> mMessageList;
 
-    public MessageAdapter(List<Message> messages) {
+    public MessageAdapter(List<Message> messages, Context c) {
+        mContext     = c;
         mMessageList = messages;
     }
 
@@ -45,61 +48,39 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final Message m = mMessageList.get(position);
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)holder.messageTv.getLayoutParams();
-        LinearLayout.LayoutParams lpIV = (LinearLayout.LayoutParams)holder.messageIv.getLayoutParams();
+        final Message m   = mMessageList.get(position);
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+        int pixelsSize    = (int) (30 * scale + 0.5f);
+        int pixelsMargin  = (int) (5 * scale + 0.5f);
 
+        RelativeLayout.LayoutParams paramsIV = new RelativeLayout.LayoutParams(
+                pixelsSize, pixelsSize);
+        RelativeLayout.LayoutParams paramsTV = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        holder.messageTv.setText(m.getMessage());
         if (m.getSender() == null) {
-            holder.messageTv.setText(m.getMessage());
-            holder.messageTv.setVisibility(View.VISIBLE);
-            holder.messageTv.setBackgroundColor(Color.BLUE);
-            lp.gravity   = Gravity.RIGHT;
-            lpIV.gravity = Gravity.RIGHT;
             holder.messageIv.setImageResource(R.drawable.default_user);
 
-            //Because getSender == null
-            /*long currentId = -1;
-            if (oldId != currentId) {
-                holder.messageUserIv.setVisibility(View.VISIBLE);
-                if (m.getReceiver().getPicture() != null) {
-                    holder.messageUserIv.setImageBitmap((m.getReceiver().getPicture()));
-                } else {
-                    holder.messageUserIv.setImageResource(R.drawable.default_user);
-                }
-                Log.d("Display for me", "OLD: " + oldId + " - " + " NEW:" + currentId + " - POSITION: " + position);
-            } else {
-                holder.messageUserIv.setVisibility(View.GONE);
-            }
-            oldId = -1;*/
+            paramsIV.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            holder.messageIv.setLayoutParams(paramsIV);
+
+            paramsTV.addRule(RelativeLayout.LEFT_OF, holder.messageIv.getId());
+            paramsTV.rightMargin = pixelsMargin;
+            holder.messageTv.setLayoutParams(paramsTV);
         } else {
-            holder.messageTv.setText(m.getMessage());
-            holder.messageTv.setVisibility(View.VISIBLE);
-            holder.messageTv.setBackgroundColor(Color.RED);
-            lp.gravity   = Gravity.LEFT;
-            lpIV.gravity = Gravity.LEFT;
+            paramsIV.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            holder.messageIv.setLayoutParams(paramsIV);
+
+            paramsTV.addRule(RelativeLayout.RIGHT_OF, holder.messageIv.getId());
+            paramsTV.leftMargin = pixelsMargin;
+            holder.messageTv.setLayoutParams(paramsTV);
+
             if (m.getSender().getPicture() != null) {
                 holder.messageIv.setImageBitmap((m.getSender().getPicture()));
             } else {
                 holder.messageIv.setImageResource(R.drawable.default_user);
             }
-            /*if (m.getSender().getPicture() != null) {
-                holder.messageIv.setImageBitmap(m.getSender().getPicture());
-            } else {
-                holder.messageIv.setImageResource(R.drawable.default_user);
-            }*/
-           /* if (oldId != m.getSender().getContactId()) {
-                holder.messageUserIv.setVisibility(View.VISIBLE);
-                if (m.getSender().getPicture() != null) {
-                    holder.messageUserIv.setImageBitmap(m.getSender().getPicture());
-                } else {
-                    holder.messageUserIv.setImageResource(R.drawable.default_user);
-                }
-                Log.d("Display for me", "OLD: " + oldId + " - " + " NEW:" + m.getSender().getContactId() + " - POSITION: " + position);
-            }
-            else {
-                holder.messageUserIv.setVisibility(View.GONE);
-            }
-            oldId = m.getSender().getContactId();*/
         }
     }
 

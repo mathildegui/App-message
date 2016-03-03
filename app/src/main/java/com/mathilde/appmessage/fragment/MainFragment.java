@@ -1,13 +1,18 @@
 package com.mathilde.appmessage.fragment;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -19,6 +24,7 @@ import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.Message_Table;
 import com.mathilde.appmessage.bean.User;
+import com.mathilde.appmessage.utils.RecyclerItemClickListener;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,7 +36,7 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements ActionMode.Callback {
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -38,11 +44,12 @@ public class MainFragment extends Fragment {
 
     private ConversationAdapter mAdapter;
     private List<Conversation> mConversationList;
+    private OnListFragmentInteractionListener mListener;
 
     public MainFragment() {
 
     }
-
+    RecyclerView mRv;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -55,14 +62,34 @@ public class MainFragment extends Fragment {
         /**
          * FIXME :: CLEAN THIS SHIT
          */
-        mConversationList = SQLite.select().from(Conversation.class).queryList();
+        mConversationList = SQLite.select().from(Conversation.class).groupBy(Conversation_Table.user_id).queryList();
+Log.d("CONV LIST", mConversationList.toString());
 
-
-        RecyclerView rv = (RecyclerView)v.findViewById(R.id.conversations_rv);
+        mRv = (RecyclerView)v.findViewById(R.id.conversations_rv);
         mAdapter = new ConversationAdapter(mConversationList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-        rv.setLayoutManager(mLayoutManager);
-        rv.setAdapter(mAdapter);
+        mRv.setLayoutManager(mLayoutManager);
+        mRv.setAdapter(mAdapter);
+
+        mRv.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                mListener.onListFragmentInteraction(mAdapter.getItem(position).getUser());
+            }
+
+            @Override
+            public void onItemLongPress(View childView, int position) {
+                if (actionMode != null) {
+                    return;
+                }
+                // Start the CAB using the ActionMode.Callback defined above
+                actionMode = getActivity().startActionMode(MainFragment.this);
+
+                Log.d("actionMode", actionMode + "");
+                mAdapter.toggleSelection(position);
+                actionMode.setTitle("title");
+            }
+        }));
         return v;
     }
 
@@ -77,5 +104,65 @@ public class MainFragment extends Fragment {
         }
 
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnListFragmentInteractionListener) {
+            mListener = (OnListFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnListFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        //if(mode != null) {
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.menu_context_action, menu);
+        //}
+        //fab.setVisibility(View.GONE);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(
+            ActionMode actionMode,
+            MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.menu_delete:
+                List<Integer> selectedItemPositions =
+                        mAdapter.getSelectedItems();
+                for (int i = selectedItemPositions.size()-1; i >= 0; i--) {
+                mAdapter.removeData(selectedItemPositions.get(i));
+            }
+            actionMode.finish();
+            return true;
+            default:
+                return false;
+        }
+    }
+    ActionMode actionMode;
+    @Override
+    public void onDestroyActionMode(ActionMode actionMode) {
+        this.actionMode = null;
+        mAdapter.clearSelections();
+    }
+
+    public interface OnListFragmentInteractionListener {
+        void onListFragmentInteraction(User user);
     }
 }

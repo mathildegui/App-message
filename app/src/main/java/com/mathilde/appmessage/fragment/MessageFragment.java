@@ -1,11 +1,14 @@
 package com.mathilde.appmessage.fragment;
 
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +26,11 @@ import com.raizlabs.android.dbflow.sql.language.SQLite;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,7 +85,7 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
     @Subscribe
     public void onEvent(Message message) {
         mMessageList.add(message);
-        mAdapter.notifyItemInserted(mMessageList.size() -1);
+        mAdapter.notifyItemInserted(mMessageList.size() - 1);
         scrollBottom();
     }
 
@@ -105,7 +113,7 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
 
         mMessageEt   = (EditText)v.findViewById(R.id.message_et);
         mMessageList = new ArrayList<>();
-        mAdapter     = new MessageAdapter(mMessageList);
+        mAdapter     = new MessageAdapter(mMessageList, getContext());
 
         recyclerView = (RecyclerView) v.findViewById(R.id.messages_rv);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -133,11 +141,14 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
 
                 //Associate the conversation or create it
                 Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(receiver.getContactId())).querySingle();
+                Log.d("QUERY", SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(receiver.getContactId())).getQuery());
                 if(localC == null) {
+                    Log.d("CREATE", "CONV");
                     Conversation conversation = new Conversation(receiver, m);
                     conversation.save();
                     m.associateConversation(conversation);
                 } else {
+                    Log.d("ASSOC", "CONV");
                     m.associateConversation(localC);
                     localC.setLastMessage(m);
                     localC.update();

@@ -29,7 +29,8 @@ import com.mathilde.appmessage.fragment.MessageFragment;
 
 
 public class MainActivity extends AppCompatActivity implements
-        ContactListFragment.OnListFragmentInteractionListener {
+        ContactListFragment.OnListFragmentInteractionListener,
+        MainFragment.OnListFragmentInteractionListener {
 
     private static final int MY_PERMISSIONS = 10;
 
@@ -62,20 +63,13 @@ public class MainActivity extends AppCompatActivity implements
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //isContactGranted = true;
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
 
                 } else {
-                    //isContactGranted = false;
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 

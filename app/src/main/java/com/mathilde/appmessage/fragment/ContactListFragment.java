@@ -157,6 +157,11 @@ public class ContactListFragment extends Fragment implements SearchView.OnQueryT
                     e.printStackTrace();
                 }
             }
+
+            @Override
+            public void onItemLongPress(View childView, int position) {
+
+            }
         }));
     }
 
