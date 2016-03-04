@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class MessageReceiver extends BroadcastReceiver {
-    //final SmsManager sms = SmsManager.getDefault();
     private EventBus bus = EventBus.getDefault();
 
     public MessageReceiver() {
