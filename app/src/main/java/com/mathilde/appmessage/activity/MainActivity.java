@@ -15,9 +15,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.fragment.ContactListFragment;
@@ -30,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements
         MainFragment.OnListFragmentInteractionListener {
 
     private static final int MY_PERMISSIONS = 10;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private void checkPermission() {
         String SEND_SMS        = Manifest.permission.SEND_SMS;
@@ -80,7 +84,9 @@ public class MainActivity extends AppCompatActivity implements
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         setSupportActionBar(toolbar);
+
         checkPermission();
+        checkPlayServices();
 
         // Enable the Up button
         if (ab != null) {
@@ -143,6 +149,22 @@ public class MainActivity extends AppCompatActivity implements
                 onBackPressed();
                 break;
         }
+        return true;
+    }
+
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i("TAG", "This device is not supported.");
+                finish();
+            }
+            return false;
+        } 
         return true;
     }
 }
