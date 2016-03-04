@@ -125,11 +125,7 @@ Log.d("CONV LIST", mConversationList.toString());
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        //if(mode != null) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.menu_context_action, menu);
-        //}
-        //fab.setVisibility(View.GONE);
+        mode.getMenuInflater().inflate(R.menu.menu_context_action, menu);
         return true;
     }
 
