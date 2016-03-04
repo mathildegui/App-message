@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -56,6 +57,7 @@ public class MainFragment extends Fragment implements ActionMode.Callback {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         getActivity().findViewById(R.id.fab).setVisibility(View.VISIBLE);
 
+
         // Register as a subscriber
         if(!EventBus.getDefault().isRegistered(this))EventBus.getDefault().register(this);
 
@@ -88,6 +90,7 @@ Log.d("CONV LIST", mConversationList.toString());
                 Log.d("actionMode", actionMode + "");
                 mAdapter.toggleSelection(position);
                 actionMode.setTitle("title");
+                //((Toolbar) mView.findViewById(R.id.toolbar)).setLogo(R.drawable.ic_close_white);
             }
         }));
         return v;
