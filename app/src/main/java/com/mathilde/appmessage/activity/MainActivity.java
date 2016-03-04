@@ -26,6 +26,7 @@ import com.mathilde.appmessage.bean.User;
 import com.mathilde.appmessage.fragment.ContactListFragment;
 import com.mathilde.appmessage.fragment.MainFragment;
 import com.mathilde.appmessage.fragment.MessageFragment;
+import com.mathilde.appmessage.service.RegistrationIntentService;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         checkPermission();
-        checkPlayServices();
+        registerForNotifications();
 
         // Enable the Up button
         if (ab != null) {
@@ -132,6 +133,14 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    private void registerForNotifications() {
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
+    }
+
     @Override
     public void onListFragmentInteraction(User user) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -164,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements
                 finish();
             }
             return false;
-        } 
+        }
         return true;
     }
 }
