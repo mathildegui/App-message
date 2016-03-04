@@ -36,6 +36,9 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class MessageReceiver extends BroadcastReceiver {
+
+    private static final int SMS_ID = 0;
+
     private EventBus bus = EventBus.getDefault();
 
     public MessageReceiver() {
@@ -49,79 +52,82 @@ public class MessageReceiver extends BroadcastReceiver {
             if (b != null) {
                 final Object[] objs = (Object[]) b.get("pdus");
 
-                for (int i = 0; i < objs.length; i++) {
-                    SmsMessage currentMessage;
+                if (objs != null) {
+                    for (int i = 0; i < objs.length; i++) {
+                        SmsMessage currentMessage;
 
-                    if (Build.VERSION.SDK_INT >= 19) { //KITKAT
-                        SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(intent);
-                        currentMessage = msgs[i];
-                    } else {
-                        currentMessage = SmsMessage.createFromPdu((byte[]) objs[i]);
-                    }
-                    String message = currentMessage.getDisplayMessageBody();
-                    String phoneNumber = currentMessage.getDisplayOriginatingAddress();
-
-
-                    //get the user _ID from contact list
-                    Uri uri  = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-                    Cursor c = context
-                            .getContentResolver()
-                            .query(uri,
-                                    new String[]{
-                                            ContactsContract.PhoneLookup._ID,
-                                            ContactsContract.Contacts.DISPLAY_NAME},
-                                    null,
-                                    null,
-                                    null);
-
-                    long contactId     = -1;
-                    String contactName = null;
-                    if (c != null) {
-                        if (c.moveToFirst()) {
-                            contactId   = c.getLong(c.getColumnIndex(ContactsContract.PhoneLookup._ID));
-                            contactName = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                        if (Build.VERSION.SDK_INT >= 19) { //KITKAT
+                            SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                            currentMessage = msgs[i];
+                        } else {
+                            currentMessage = SmsMessage.createFromPdu((byte[]) objs[i]);
                         }
-                    }
+                        String message = currentMessage.getDisplayMessageBody();
+                        String phoneNumber = currentMessage.getDisplayOriginatingAddress();
 
-                    Message m = new Message();
-                    //Create the message in DB if the user exist
-                    //else create the message and the user
-                    User u = User.getUserByContactId(contactId);
-                    if (u == null) {
-                        Cursor cursorPhones = QueryContact.getInstance(context).getPhones(String.valueOf(contactId));
-                        if (cursorPhones != null) {
-                            while (cursorPhones.moveToNext()) {
-                                int index = cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                                int type = cursorPhones.getInt(cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
-                                if (type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) {
-                                    if (index != -1) {
-                                        phoneNumber = cursorPhones.getString(index);
-                                        u = new User(contactId, contactName, phoneNumber, loadContactPhoto(context.getContentResolver(), String.valueOf(contactId)));
-                                        u.save();
+
+                        //get the user _ID from contact list
+                        Uri uri  = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+                        Cursor c = context
+                                .getContentResolver()
+                                .query(uri,
+                                        new String[]{
+                                                ContactsContract.PhoneLookup._ID,
+                                                ContactsContract.Contacts.DISPLAY_NAME},
+                                        null,
+                                        null,
+                                        null);
+
+                        long contactId     = -1;
+                        String contactName = null;
+                        if (c != null) {
+                            if (c.moveToFirst()) {
+                                contactId   = c.getLong(c.getColumnIndex(ContactsContract.PhoneLookup._ID));
+                                contactName = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                            }
+                            c.close();
+                        }
+
+                        Message m = new Message();
+                        //Create the message in DB if the user exist
+                        //else create the message and the user
+                        User u = User.getUserByContactId(contactId);
+                        if (u == null) {
+                            Cursor cursorPhones = QueryContact.getInstance(context).getPhones(String.valueOf(contactId));
+                            if (cursorPhones != null) {
+                                while (cursorPhones.moveToNext()) {
+                                    int index = cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                                    int type  = cursorPhones.getInt(cursorPhones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
+                                    if (type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) {
+                                        if (index != -1) {
+                                            phoneNumber = cursorPhones.getString(index);
+                                            u = new User(contactId, contactName, phoneNumber, loadContactPhoto(context.getContentResolver(), String.valueOf(contactId)));
+                                            u.save();
+                                        }
                                     }
                                 }
+                                cursorPhones.close();
                             }
-                            cursorPhones.close();
                         }
-                    }
-                    m.setDate(new Date());
-                    m.setMessage(message);
-                    m.setSender(u);
-                    m.save();
+                        m.setDate(new Date());
+                        m.setMessage(message);
+                        m.setSender(u);
+                        m.save();
 
-                    DataManager.updateOrCreateConversation(u, m);
+                        DataManager.updateOrCreateConversation(u, m);
 
-                    bus.post(m);
+                        bus.post(m);
 
-                    /* If this app is the default message one, then display the notification */
-                    if(context.getPackageName().equals(Telephony.Sms.getDefaultSmsPackage(context))) {
-                        if (u != null) {
-                            sendNotification(m.getMessage(), u.getName(), context);
-                        } else {
-                            sendNotification(m.getMessage(), context.getString(R.string.new_message), context);
+                        /* If this app is the default message one, then display the notification */
+                        if(context.getPackageName().equals(Telephony.Sms.getDefaultSmsPackage(context))) {
+                            if (u != null) {
+                                sendNotification(m.getMessage(), u.getName(), context);
+                            } else {
+                                sendNotification(m.getMessage(), context.getString(R.string.new_message), context);
+                            }
                         }
+                        Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                     }
-                    Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                 }
             }
         } catch (Exception e) {
@@ -147,7 +153,7 @@ public class MessageReceiver extends BroadcastReceiver {
 
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(SMS_ID, notificationBuilder.build());
     }
 
     public Bitmap loadContactPhoto(ContentResolver cr, String id) {

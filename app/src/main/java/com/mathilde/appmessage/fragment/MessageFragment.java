@@ -6,15 +6,17 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.mathilde.appmessage.R;
 import com.mathilde.appmessage.adapter.MessageAdapter;
-import com.mathilde.appmessage.bean.Conversation;
-import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.Message_Table;
 import com.mathilde.appmessage.bean.User;
@@ -65,6 +67,8 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         getbundle();
         View view = inflater.inflate(R.layout.fragment_message, container, false);
+
+        setHasOptionsMenu(true);
 
         // Register as a subscriber
         bus.register(this);
@@ -137,8 +141,24 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(receiver.getNumber(), null, message, null, null);
                 scrollBottom();
-                
+
                 break;
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_message, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_call:
+                Log.d("ACTION", receiver.getNumber());
+                break;
+        }
+        return true;
     }
 }

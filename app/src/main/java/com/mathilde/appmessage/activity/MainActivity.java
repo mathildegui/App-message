@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements
                 onBackPressed();
                 break;
         }
-        return true;
+        return false;
     }
 
     private boolean checkPlayServices() {
