@@ -55,7 +55,7 @@ public class RegistrationIntentService extends IntentService {
             e.printStackTrace();
             sharedPrefs.edit().putBoolean(Constant.SENT_TOKEN, false).apply();
         }
-        
+
         Intent registrationComplete = new Intent(Constant.REGISTRATION_COMPLETE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }

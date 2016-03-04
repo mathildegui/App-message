@@ -1,10 +1,15 @@
 package com.mathilde.appmessage.activity;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +17,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +33,7 @@ import com.mathilde.appmessage.fragment.ContactListFragment;
 import com.mathilde.appmessage.fragment.MainFragment;
 import com.mathilde.appmessage.fragment.MessageFragment;
 import com.mathilde.appmessage.service.RegistrationIntentService;
+import com.mathilde.appmessage.utils.Constant;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -35,6 +42,10 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int MY_PERMISSIONS = 10;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+
+    private boolean isReceiverRegistered;
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     private void checkPermission() {
         String SEND_SMS        = Manifest.permission.SEND_SMS;
@@ -88,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements
 
         checkPermission();
         registerForNotifications();
+        initBroadcast();
 
         // Enable the Up button
         if (ab != null) {
@@ -133,6 +145,16 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    private void initBroadcast() {
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                /*SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);*/
+                Log.d("SUBSCRIBTION", "IS OKAY");
+            }
+        };
+    }
+
     private void registerForNotifications() {
         if (checkPlayServices()) {
             // Start IntentService to register this application with GCM.
@@ -175,5 +197,33 @@ public class MainActivity extends AppCompatActivity implements
             return false;
         }
         return true;
+    }
+
+    private void registerReceiver() {
+        if(!isReceiverRegistered) {
+            LocalBroadcastManager
+                    .getInstance(this)
+                    .registerReceiver(
+                            mRegistrationBroadcastReceiver,
+                            new IntentFilter(Constant.REGISTRATION_COMPLETE));
+            isReceiverRegistered = true;
+        }
+    }
+
+    private void unregisterReceiver() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        isReceiverRegistered = false;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver();
     }
 }
