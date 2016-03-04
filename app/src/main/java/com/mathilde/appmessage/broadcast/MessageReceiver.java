@@ -1,5 +1,7 @@
 package com.mathilde.appmessage.broadcast;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -8,20 +10,22 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Telephony;
-import android.telephony.SmsManager;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import com.mathilde.appmessage.R;
+import com.mathilde.appmessage.activity.MainActivity;
 import com.mathilde.appmessage.bean.Conversation;
 import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.User;
-import com.mathilde.appmessage.utils.Numbers;
 import com.mathilde.appmessage.utils.QueryContact;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
@@ -116,12 +120,38 @@ public class MessageReceiver extends BroadcastReceiver {
                     }
 
                     bus.post(m);
+
+                    /* If this app is the default message one, then display the notification */
+                    if(context.getPackageName().equals(Telephony.Sms.getDefaultSmsPackage(context))) {
+                        sendNotification(m.getMessage(), u.getName(), context);
+                    }
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                 }
             }
         } catch (Exception e) {
             Log.e("SmsReceiver", "Exception smsReceiver" + e);
         }
+    }
+
+    private void sendNotification(String message, String from, Context c) {
+        Intent intent = new Intent(c, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(c, 0 /* Request code */, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
+                .setSmallIcon(R.drawable.ic_add_white)
+                .setContentTitle(from)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
 
     public Bitmap loadContactPhoto(ContentResolver cr, String id) {

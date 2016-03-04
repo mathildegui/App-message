@@ -1,16 +1,16 @@
 package com.mathilde.appmessage.service;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+import android.os.Bundle;
+import android.util.Log;
 
-public class MyGcmListenerService extends Service {
-    public MyGcmListenerService() {
-    }
+import com.google.android.gms.gcm.GcmListenerService;
 
+public class MyGcmListenerService extends GcmListenerService {
     @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+    public void onMessageReceived(String from, Bundle data) {
+        super.onMessageReceived(from, data);
+        String message = data.getString("message");
+        Log.d("Message", message);
+        Log.d("From", from);
     }
 }

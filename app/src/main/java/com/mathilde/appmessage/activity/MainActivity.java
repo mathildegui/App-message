@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onReceive(Context context, Intent intent) {
                 /*SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);*/
-                Log.d("SUBSCRIBTION", "IS OKAY");
+                /*Log.d("SUBSCRIBTION", "IS OKAY");*/
             }
         };
     }
