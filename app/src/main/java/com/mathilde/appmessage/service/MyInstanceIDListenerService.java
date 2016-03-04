@@ -1,31 +1,20 @@
 package com.mathilde.appmessage.service;
 
-import android.app.IntentService;
-import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.android.gms.iid.InstanceID;
-import com.mathilde.appmessage.R;
+import com.google.android.gms.iid.InstanceIDListenerService;
 
-import java.io.IOException;
-
-public class MyInstanceIDListenerService extends IntentService {
+public class MyInstanceIDListenerService extends InstanceIDListenerService {
 
     /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
+     * Called if InstanceID token is updated. This may occur if the security of
+     * the previous token had been compromised. This call is initiated by the
+     * InstanceID provider.
      */
-    public MyInstanceIDListenerService(String name) {
-        super(name);
-    }
-
     @Override
-    protected void onHandleIntent(Intent intent) {
-
+    public void onTokenRefresh() {
+        // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
+        Intent intent = new Intent(this, RegistrationIntentService.class);
+        startService(intent);
     }
 }

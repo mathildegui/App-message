@@ -97,9 +97,11 @@ public class MainActivity extends AppCompatActivity implements
 
         setSupportActionBar(toolbar);
 
-        checkPermission();
-        registerForNotifications();
         initBroadcast();
+
+        checkPermission();
+        registerReceiver();
+        registerForNotifications();
 
         // Enable the Up button
         if (ab != null) {
