@@ -1,14 +1,11 @@
 package com.mathilde.appmessage.fragment;
 
 
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +23,6 @@ import com.raizlabs.android.dbflow.sql.language.SQLite;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -120,7 +112,6 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
 
         recyclerView.setAdapter(mAdapter);
         recyclerView.setItemAnimator(null);
-        //recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(mLayoutManager);
     }
 
@@ -140,15 +131,12 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                 mAdapter.notifyItemInserted(mMessageList.size() - 1);
 
                 //Associate the conversation or create it
-                Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(receiver.getContactId())).querySingle();
-                Log.d("QUERY", SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(receiver.getContactId())).getQuery());
+                Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(User.getUserByContactId(receiver.getContactId()).getId())).querySingle();
                 if(localC == null) {
-                    Log.d("CREATE", "CONV");
                     Conversation conversation = new Conversation(receiver, m);
                     conversation.save();
                     m.associateConversation(conversation);
                 } else {
-                    Log.d("ASSOC", "CONV");
                     m.associateConversation(localC);
                     localC.setLastMessage(m);
                     localC.update();

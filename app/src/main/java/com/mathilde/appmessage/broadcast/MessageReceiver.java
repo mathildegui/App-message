@@ -52,7 +52,6 @@ public class MessageReceiver extends BroadcastReceiver {
                         SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(intent);
                         currentMessage = msgs[i];
                     } else {
-                        //Object pdus[] = (Object[]) b.get("pdus");
                         currentMessage = SmsMessage.createFromPdu((byte[]) objs[i]);
                     }
                     String message = currentMessage.getDisplayMessageBody();
@@ -60,14 +59,22 @@ public class MessageReceiver extends BroadcastReceiver {
 
 
                     //get the user _ID from contact list
-                    Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-                    Cursor c = context.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup._ID,
-                            ContactsContract.Contacts.DISPLAY_NAME}, null, null, null);
-                    long contactId = -1;
+                    Uri uri  = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+                    Cursor c = context
+                            .getContentResolver()
+                            .query(uri,
+                                    new String[]{
+                                            ContactsContract.PhoneLookup._ID,
+                                            ContactsContract.Contacts.DISPLAY_NAME},
+                                    null,
+                                    null,
+                                    null);
+
+                    long contactId     = -1;
                     String contactName = null;
                     if (c != null) {
                         if (c.moveToFirst()) {
-                            contactId = c.getLong(c.getColumnIndex(ContactsContract.PhoneLookup._ID));
+                            contactId   = c.getLong(c.getColumnIndex(ContactsContract.PhoneLookup._ID));
                             contactName = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
                         }
                     }
@@ -90,7 +97,6 @@ public class MessageReceiver extends BroadcastReceiver {
                                     }
                                 }
                             }
-                            Log.d("THE ID ___", contactId + "");
                             cursorPhones.close();
                         }
                     }
@@ -110,7 +116,6 @@ public class MessageReceiver extends BroadcastReceiver {
                         localC.update();
                     }
 
-
                     bus.post(m);
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                 }
@@ -119,8 +124,6 @@ public class MessageReceiver extends BroadcastReceiver {
             Log.e("SmsReceiver", "Exception smsReceiver" + e);
         }
     }
-
-
 
     public Bitmap loadContactPhoto(ContentResolver cr, String id) {
         Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.valueOf(id));

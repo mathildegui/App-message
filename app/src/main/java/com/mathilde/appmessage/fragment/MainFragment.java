@@ -25,6 +25,7 @@ import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.Message_Table;
 import com.mathilde.appmessage.bean.User;
+import com.mathilde.appmessage.utils.DataManager;
 import com.mathilde.appmessage.utils.RecyclerItemClickListener;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
@@ -43,6 +44,7 @@ public class MainFragment extends Fragment implements ActionMode.Callback {
         return new MainFragment();
     }
 
+    private ActionMode actionMode;
     private ConversationAdapter mAdapter;
     private List<Conversation> mConversationList;
     private OnListFragmentInteractionListener mListener;
@@ -50,30 +52,25 @@ public class MainFragment extends Fragment implements ActionMode.Callback {
     public MainFragment() {
 
     }
-    RecyclerView mRv;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         getActivity().findViewById(R.id.fab).setVisibility(View.VISIBLE);
 
-
         // Register as a subscriber
         if(!EventBus.getDefault().isRegistered(this))EventBus.getDefault().register(this);
 
-        /**
-         * FIXME :: CLEAN THIS SHIT
-         */
         mConversationList = SQLite.select().from(Conversation.class).groupBy(Conversation_Table.user_id).queryList();
-Log.d("CONV LIST", mConversationList.toString());
-
-        mRv = (RecyclerView)v.findViewById(R.id.conversations_rv);
+        RecyclerView recyclerView = (RecyclerView)v.findViewById(R.id.conversations_rv);
         mAdapter = new ConversationAdapter(mConversationList);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-        mRv.setLayoutManager(mLayoutManager);
-        mRv.setAdapter(mAdapter);
 
-        mRv.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setAdapter(mAdapter);
+
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 mListener.onListFragmentInteraction(mAdapter.getItem(position).getUser());
@@ -86,11 +83,7 @@ Log.d("CONV LIST", mConversationList.toString());
                 }
                 // Start the CAB using the ActionMode.Callback defined above
                 actionMode = getActivity().startActionMode(MainFragment.this);
-
-                Log.d("actionMode", actionMode + "");
                 mAdapter.toggleSelection(position);
-                actionMode.setTitle("title");
-                //((Toolbar) mView.findViewById(R.id.toolbar)).setLogo(R.drawable.ic_close_white);
             }
         }));
         return v;
@@ -99,13 +92,11 @@ Log.d("CONV LIST", mConversationList.toString());
     @Subscribe
     public void onEvent(Message message) {
         Conversation conversation = message.getConversationForeignKeyContainer().load();
-
         if(!mConversationList.contains(conversation)) {
             mConversationList.add(conversation);
         } else {
             mConversationList.set(mConversationList.indexOf(conversation), conversation);
         }
-
         mAdapter.notifyDataSetChanged();
     }
 
@@ -143,18 +134,18 @@ Log.d("CONV LIST", mConversationList.toString());
             MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.menu_delete:
-                List<Integer> selectedItemPositions =
-                        mAdapter.getSelectedItems();
+                List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
                 for (int i = selectedItemPositions.size()-1; i >= 0; i--) {
-                mAdapter.removeData(selectedItemPositions.get(i));
-            }
-            actionMode.finish();
-            return true;
+                    DataManager.deleteAllMessages(mAdapter.getItem(i));
+                    mAdapter.removeData(selectedItemPositions.get(i));
+                }
+                actionMode.finish();
+                return true;
             default:
                 return false;
         }
     }
-    ActionMode actionMode;
+
     @Override
     public void onDestroyActionMode(ActionMode actionMode) {
         this.actionMode = null;
