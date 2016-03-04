@@ -18,6 +18,7 @@ import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.Message_Table;
 import com.mathilde.appmessage.bean.User;
+import com.mathilde.appmessage.utils.DataManager;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.greenrobot.eventbus.EventBus;
@@ -88,12 +89,12 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                 .or(Message_Table.sender_id.eq(receiver.getId()))
                 .orderBy(Message_Table.date, true)
                 .queryList());
-        scrollBottom();
-        mAdapter.notifyDataSetChanged();
 
+        mAdapter.notifyDataSetChanged();
+        scrollBottom();
     }
 
-    private void scrollBottom () {
+    private void scrollBottom() {
         if(mMessageList.size() > 0) {
             recyclerView.smoothScrollToPosition(mMessageList.size() - 1);
         }
@@ -103,8 +104,8 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
         getActivity().findViewById(R.id.fab).setVisibility(View.GONE);
         v.findViewById(R.id.send_ib).setOnClickListener(this);
 
-        mMessageEt   = (EditText)v.findViewById(R.id.message_et);
         mMessageList = new ArrayList<>();
+        mMessageEt   = (EditText)v.findViewById(R.id.message_et);
         mAdapter     = new MessageAdapter(mMessageList, getContext());
 
         recyclerView = (RecyclerView) v.findViewById(R.id.messages_rv);
@@ -129,23 +130,14 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                 mMessageList.add(m);
                 mMessageEt.setText("");
                 mAdapter.notifyItemInserted(mMessageList.size() - 1);
+                m.save();
 
-                //Associate the conversation or create it
-                Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(User.getUserByContactId(receiver.getContactId()).getId())).querySingle();
-                if(localC == null) {
-                    Conversation conversation = new Conversation(receiver, m);
-                    conversation.save();
-                    m.associateConversation(conversation);
-                } else {
-                    m.associateConversation(localC);
-                    localC.setLastMessage(m);
-                    localC.update();
-                }
+                DataManager.updateOrCreateConversation(receiver, m);
 
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(receiver.getNumber(), null, message, null, null);
-
-                m.save();
+                scrollBottom();
+                
                 break;
         }
     }

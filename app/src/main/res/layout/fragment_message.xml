@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mathilde.appmessage.fragment.MessageFragment">
+    tools:context="com.mathilde.appmessage.fragment.MessageFragment"
+    android:background="@android:color/darker_gray">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messages_rv"

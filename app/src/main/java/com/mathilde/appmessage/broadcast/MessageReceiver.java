@@ -26,6 +26,7 @@ import com.mathilde.appmessage.bean.Conversation;
 import com.mathilde.appmessage.bean.Conversation_Table;
 import com.mathilde.appmessage.bean.Message;
 import com.mathilde.appmessage.bean.User;
+import com.mathilde.appmessage.utils.DataManager;
 import com.mathilde.appmessage.utils.QueryContact;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
@@ -108,22 +109,17 @@ public class MessageReceiver extends BroadcastReceiver {
                     m.setSender(u);
                     m.save();
 
-                    Conversation localC = SQLite.select().from(Conversation.class).where(Conversation_Table.user_id.eq(User.getUserByContactId(u.getContactId()).getId())).querySingle();
-                    if(localC == null) {
-                        Conversation conversation = new Conversation(u, m);
-                        conversation.save();
-                        m.associateConversation(conversation);
-                    } else {
-                        m.associateConversation(localC);
-                        localC.setLastMessage(m);
-                        localC.update();
-                    }
+                    DataManager.updateOrCreateConversation(u, m);
 
                     bus.post(m);
 
                     /* If this app is the default message one, then display the notification */
                     if(context.getPackageName().equals(Telephony.Sms.getDefaultSmsPackage(context))) {
-                        sendNotification(m.getMessage(), u.getName(), context);
+                        if (u != null) {
+                            sendNotification(m.getMessage(), u.getName(), context);
+                        } else {
+                            sendNotification(m.getMessage(), context.getString(R.string.new_message), context);
+                        }
                     }
                     Log.i("SmsReceiver", "senderNum: " + m.getSender().getNumber() + "; message: " + message);
                 }
